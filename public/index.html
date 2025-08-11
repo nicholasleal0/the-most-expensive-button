@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Most Expensive Button in the World</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+        .big-red-button {
+            animation: pulse 2s infinite, shake 5s infinite;
+        }
+        .alert-mode .big-red-button {
+            animation: pulse 0.5s infinite, shake 1s infinite;
+        }
+        .alert-banner {
+            animation: flash 1s infinite;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .warning-stripes {
+            background: repeating-linear-gradient(45deg, #f59e0b, #f59e0b 10px, #000 10px, #000 20px);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-500">
+    
+    <div class="max-w-4xl w-full text-center">
+        <!-- Alert Banner (hidden by default) -->
+        <div id="alertBanner" class="alert-banner hidden bg-yellow-500 text-black font-bold py-3 px-4 mb-6 rounded-lg"></div>
+        
+        <!-- Error Box -->
+        <div id="errorBox" class="hidden bg-red-600 text-white font-bold py-3 px-4 mb-6 rounded-lg"></div>
+        
+        <!-- Main Title -->
+        <h1 id="mainTitle" class="text-4xl md:text-6xl font-extrabold mb-2"></h1>
+        <h2 id="subTitle" class="text-xl md:text-2xl text-gray-300 mb-8"></h2>
+        
+        <!-- Button Container -->
+        <div class="relative my-12">
+            <div class="warning-stripes p-2 rounded-full inline-block">
+                <div class="bg-gray-900 p-2 rounded-full">
+                    <button id="expensiveButton" 
+                            class="big-red-button bg-red-500 hover:bg-red-600 text-white font-bold py-8 px-16 rounded-full text-2xl md:text-3xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50"
+                            aria-live="polite">
+                        <span id="buttonText"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Container -->
+        <div class="bg-gray-800 rounded-xl p-6 mb-8 shadow-xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Click Counter -->
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-2" id="clickCounterTitle"></h3>
+                    <div class="text-3xl font-bold">
+                        <span id="currentClicks">0</span> / <span id="clickGoal">...</span> <span id="clicksText"></span>
+                    </div>
+                    <div class="w-full bg-gray-600 rounded-full h-4 mt-2">
+                        <div id="progressBar" class="bg-yellow-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Donation Info -->
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-2" id="donationTitle"></h3>
+                    <p class="mb-3 text-gray-300">
+                        <span id="donationText"></span> <span id="charityName" class="font-semibold"></span>.
+                    </p>
+                    <p class="text-xl font-bold">
+                        <span id="fundsText"></span> ~$<span id="totalRaised">0.00</span> USD
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Toast -->
+    <div id="successToast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
+        <span id="successMessage"></span>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = '';
+        
+        // Translations
+        const translations = {
+            en: {
+                mainTitle: 'THE MOST EXPENSIVE BUTTON IN THE WORLD',
+                subTitle: 'It does absolutely nothing. But you can say you were part of it. And you still help a noble cause.',
+                buttonText: 'Click to Pay and Press',
+                clickCounterTitle: 'CLICK COUNTER',
+                clicksText: 'CLICKS',
+                donationTitle: 'DONATION INFO',
+                donationText: 'When the click goal is reached, half of all the money raised will be donated to',
+                fundsText: 'Current funds raised:',
+                successMessage: 'Payment successful! Your click has been counted.',
+                alertBanner: 'GOAL ALMOST REACHED!',
+                errorNetwork: 'Network error. Please check your connection and try again.',
+                errorPayment: 'Payment error. Please try again.',
+                redirecting: 'Redirecting to payment...'
+            },
+            pt: {
+                mainTitle: 'O BOTÃO MAIS CARO DO MUNDO',
+                subTitle: 'Ele não faz absolutamente nada. Mas você pode dizer que fez parte disso. E ainda ajuda uma causa nobre.',
+                buttonText: 'Clique para Pagar e Apertar',
+                clickCounterTitle: 'CONTADOR DE CLICKS',
+                clicksText: 'CLICKS',
+                donationTitle: 'INFORMAÇÃO DE DOAÇÃO',
+                donationText: 'Quando a meta de cliques for atingida, metade de todo o dinheiro arrecadado será doado para',
+                fundsText: 'Fundos arrecadados:',
+                successMessage: 'Pagamento bem-sucedido! Seu clique foi contado.',
+                alertBanner: 'META QUASE ATINGIDA!',
+                errorNetwork: 'Erro de rede. Verifique sua conexão e tente novamente.',
+                errorPayment: 'Erro no pagamento. Tente novamente.',
+                redirecting: 'Redirecionando para pagamento...'
+            }
+        };
+
+        // Detect language
+        const lang = (navigator.language || navigator.userLanguage).startsWith('pt') ? 'pt' : 'en';
+        const t = translations[lang];
+
+        // Helper functions
+        function setText(elementId, text) {
+            const element = document.getElementById(elementId);
+            if (element) element.textContent = text;
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            setText('errorBox', message);
+            errorBox.classList.remove('hidden');
+            setTimeout(() => errorBox.classList.add('hidden'), 5000);
+        }
+
+        function applyTranslations(charityName) {
+            for (const key in t) {
+                if (key !== 'errorNetwork' && key !== 'errorPayment' && key !== 'redirecting') {
+                    setText(key, t[key]);
+                }
+            }
+            setText('charityName', charityName);
+        }
+
+        // Main functions
+        async function fetchAndUpdateStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/status`);
+                if (!response.ok) throw new Error('Failed to fetch status');
+                
+                const data = await response.json();
+                
+                // Apply translations
+                applyTranslations(data.charity_name);
+
+                // Update display
+                setText('currentClicks', data.current_clicks.toLocaleString(lang));
+                setText('clickGoal', data.click_goal.toLocaleString(lang));
+                setText('totalRaised', data.total_raised_usd.toFixed(2));
+
+                // Update progress bar
+                const progressPercent = Math.min((data.current_clicks / data.click_goal) * 100, 100);
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = `${progressPercent}%`;
+
+                // Alert mode when 95% reached
+                const alertBanner = document.getElementById('alertBanner');
+                const body = document.body;
+
+                if (progressPercent >= 95) {
+                    body.classList.add('alert-mode');
+                    alertBanner.classList.remove('hidden');
+                    progressBar.classList.remove('bg-yellow-500');
+                    progressBar.classList.add('bg-red-500');
+                } else {
+                    body.classList.remove('alert-mode');
+                    alertBanner.classList.add('hidden');
+                    progressBar.classList.add('bg-yellow-500');
+                    progressBar.classList.remove('bg-red-500');
+                }
+
+            } catch (error) {
+                console.error('Failed to fetch status:', error);
+                showError(t.errorNetwork);
+            }
+        }
+
+        async function handleButtonClick() {
+            const button = document.getElementById('expensiveButton');
+            const buttonText = document.getElementById('buttonText');
+            
+            // Disable button and show loading state
+            button.disabled = true;
+            buttonText.textContent = t.redirecting;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) throw new Error('Failed to create checkout session');
+                
+                const session = await response.json();
+                
+                // Redirect to Stripe Checkout
+                window.location.href = session.url;
+                
+            } catch (error) {
+                console.error('Payment error:', error);
+                showError(t.errorPayment);
+                
+                // Re-enable button
+                button.disabled = false;
+                buttonText.textContent = t.buttonText;
+            }
+        }
+
+        function showSuccessToast() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                const toast = document.getElementById('successToast');
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                
+                // Hide toast after 5 seconds and clean URL
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 5000);
+                
+                // Refresh data to show updated count
+                setTimeout(fetchAndUpdateStatus, 1000);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('expensiveButton').addEventListener('click', handleButtonClick);
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndUpdateStatus();
+            showSuccessToast();
+            
+            // Update data every 30 seconds
+            setInterval(fetchAndUpdateStatus, 30000);
+        });
+    </script>
+</body>
+</html>
+
