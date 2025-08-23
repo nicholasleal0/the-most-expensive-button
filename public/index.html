@@ -209,12 +209,19 @@
             buttonText.textContent = t.redirecting;
             
             try {
+                // First get the current status to determine currency
+                const statusResponse = await fetch(`${API_BASE_URL}/api/status`);
+                if (!statusResponse.ok) throw new Error('Failed to get status');
+                const statusData = await statusResponse.json();
+                
                 const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                        currency: statusData.currency
+                    })
                 });
 
                 if (!response.ok) throw new Error('Failed to create checkout session');
