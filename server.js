@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 4242;
 // In-memory storage (will reset on server restart)
 let projectData = {
   totalClicks: 0,
-  currentGoal: 100,
+  currentGoal: 1000000, // 10,000 in cents (R$ 100.00 or $100.00)
   totalRaised: 0,
-  charityName: "Médicos Sem Fronteiras"
+  charityName: "Jocum"
 };
 
 // Price IDs for different currencies
@@ -77,8 +77,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Helper function to get country from IP (simplified)
 function getCountryFromIP(ip) {
   // In a real implementation, you would use a GeoIP service
-  // For now, we'll default to US
-  return 'US';
+  // For now, we'll default to BR for Brazilian users
+  return 'BR';
 }
 
 // Helper function to get currency for country
@@ -157,9 +157,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     projectData.totalClicks += 1;
     projectData.totalRaised += parseInt(session.metadata.amount || '100');
     
-    // Check if goal is reached
-    if (projectData.totalClicks >= projectData.currentGoal) {
-      projectData.currentGoal *= 2; // Double the goal
+    // Check if goal is reached and double it
+    if (projectData.totalRaised >= projectData.currentGoal) {
+      projectData.currentGoal *= 2; // Double the goal when reached
     }
     
     console.log('Payment successful:', {
