@@ -81,6 +81,78 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
         }
+        
+        /* Melhorias de responsividade mobile */
+        @media (max-width: 768px) {
+            /* 1. Adiciona "respiros" laterais ao corpo da página */
+            body {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            
+            /* 2. Ajusta o tamanho do título principal para evitar quebra ruim */
+            h1 {
+                font-size: 2.5rem !important;
+                line-height: 1.2;
+            }
+            
+            /* 3. Aumenta o destaque do botão de clique */
+            .btn-magic {
+                padding: 18px 30px;
+                font-size: 1.2rem;
+                transform: scale(1.05);
+            }
+            
+            /* 4. Garante que as caixas de informação não fiquem coladas */
+            .bg-white\/10 {
+                width: 100%;
+                margin-bottom: 1.5rem;
+            }
+            
+            /* 5. Melhora o espaçamento dos cards */
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* 6. Ajusta o tamanho do contador */
+            .text-5xl {
+                font-size: 2.5rem;
+            }
+            
+            /* 7. Melhora a legibilidade dos textos */
+            .text-lg {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+            
+            /* 8. Ajusta o grid para mobile */
+            .md\:grid-cols-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        /* Melhorias adicionais para telas muito pequenas */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem !important;
+            }
+            
+            .btn-magic {
+                padding: 15px 25px;
+                font-size: 1.1rem;
+            }
+            
+            .text-2xl {
+                font-size: 1.5rem;
+            }
+            
+            .py-12 {
+                padding-top: 2rem;
+                padding-bottom: 2rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-900 to-blue-900 min-h-screen text-white">
