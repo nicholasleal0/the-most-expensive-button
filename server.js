@@ -123,8 +123,8 @@ app.post('/api/create-checkout-session', [
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.PUBLIC_URL || 'http://localhost:4242'}?success=true`,
-      cancel_url: `${process.env.PUBLIC_URL || 'http://localhost:4242'}?canceled=true`,
+      success_url: `https://the-most-expensive-button.vercel.app?success=true`,
+      cancel_url: `https://the-most-expensive-button.vercel.app?canceled=true`,
       metadata: {
         currency: currency,
         amount: CURRENCY_AMOUNTS[currency].toString()
