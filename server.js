@@ -117,7 +117,7 @@ app.post('/api/create-checkout-session', [
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'pix'],
+      payment_method_types: ['card', 'link'],
       line_items: [{
         price: priceId,
         quantity: 1,
