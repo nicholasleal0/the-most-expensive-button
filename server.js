@@ -117,7 +117,7 @@ app.post('/api/create-checkout-session', [
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'pix'],
       line_items: [{
         price: priceId,
         quantity: 1,
@@ -128,7 +128,8 @@ app.post('/api/create-checkout-session', [
       metadata: {
         currency: currency,
         amount: CURRENCY_AMOUNTS[currency].toString()
-      }
+      },
+      locale: currency === 'BRL' ? 'pt-BR' : 'auto'
     });
 
     res.json({ url: session.url });
