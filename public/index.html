@@ -203,8 +203,22 @@
                 </div>
                 
                 <p class="text-lg text-yellow-100 mb-8">
-                    Cada clique adiciona <span id="amount-text">$1.00</span> à nossa arrecadação!
+                    <span id="click-message">Cada clique adiciona <span id="amount-text">$1.00</span> à nossa arrecadação!</span>
                 </p>
+            </div>
+            
+            <!-- PIX Payment Section (Brazilian users only) -->
+            <div id="pix-section" class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 border border-white/20" style="display: none;">
+                <h3 class="text-xl font-semibold mb-4 text-center">
+                    <i class="fas fa-qrcode mr-2"></i><span id="pix-title">Pagamento via PIX</span>
+                </h3>
+                <p class="text-center mb-4" id="pix-instruction">Copie o código PIX abaixo para fazer sua doação:</p>
+                <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                    <code class="text-xs break-all" id="pix-code">00020101021126580014br.gov.bcb.pix01366e42077e-6c9b-4a55-ba08-88660925fc9452040000530398654041.005802BR5923NICHOLAS RODRIGUES LEAL6009SAO PAULO622905251K3T2FRSJ124PDBG9EV21BG186304442A</code>
+                </div>
+                <button onclick="copyPixCode()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                    <i class="fas fa-copy mr-2"></i><span id="copy-pix-text">Copiar Código PIX</span>
+                </button>
             </div>
             
             <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
@@ -259,20 +273,52 @@
         // Translations
         const translations = {
             en: {
+                title: 'The Most Expensive Button in the World',
+                subtitle: '"It does absolutely nothing. But you can say you were part of it. And it still helps a noble cause."',
+                donationGoal: 'Donation Goal',
+                raised: 'Raised',
+                goal: 'Goal',
+                donationMessage: 'When the goal is reached, half of the amount raised will be donated to',
                 buttonText: 'CLICK HERE!',
+                clickMessage: 'Each click adds $1.00 to our fundraising!',
+                pixTitle: 'PIX Payment',
+                pixInstruction: 'Copy the PIX code below to make your donation:',
+                copyPixText: 'Copy PIX Code',
+                detailsTitle: 'Fundraising Details',
+                totalClicks: 'Total clicks:',
+                valuePerClick: 'Value per click:',
+                currentGoal: 'Current goal:',
+                valueToDonate: 'Value to be donated:',
                 successMessage: 'Payment successful! Your click has been counted.',
                 errorNetwork: 'Network error. Please check your connection and try again.',
                 errorPayment: 'Payment error. Please try again.',
                 redirecting: 'Redirecting to payment...',
-                alertText: '🎉 GOAL ALMOST REACHED! 🎉'
+                alertText: '🎉 GOAL ALMOST REACHED! 🎉',
+                pixCopied: 'PIX code copied to clipboard!'
             },
             pt: {
+                title: 'O Botão mais Caro do Mundo',
+                subtitle: '"Ele não faz absolutamente nada. Mas você pode dizer que fez parte disso. E ainda ajuda uma causa nobre."',
+                donationGoal: 'Meta de Doação',
+                raised: 'Arrecadado',
+                goal: 'Meta',
+                donationMessage: 'Quando a meta for atingida, metade do valor arrecadado será doado para',
                 buttonText: 'CLIQUE AQUI!',
+                clickMessage: 'Cada clique adiciona R$1.00 à nossa arrecadação!',
+                pixTitle: 'Pagamento via PIX',
+                pixInstruction: 'Copie o código PIX abaixo para fazer sua doação:',
+                copyPixText: 'Copiar Código PIX',
+                detailsTitle: 'Detalhes da Arrecadação',
+                totalClicks: 'Total de cliques:',
+                valuePerClick: 'Valor por clique:',
+                currentGoal: 'Meta atual:',
+                valueToDonate: 'Valor a ser doado:',
                 successMessage: 'Pagamento bem-sucedido! Seu clique foi contado.',
                 errorNetwork: 'Erro de rede. Verifique sua conexão e tente novamente.',
                 errorPayment: 'Erro no pagamento. Tente novamente.',
                 redirecting: 'Redirecionando para pagamento...',
-                alertText: '🎉 META QUASE ATINGIDA! 🎉'
+                alertText: '🎉 META QUASE ATINGIDA! 🎉',
+                pixCopied: 'Código PIX copiado para a área de transferência!'
             }
         };
 
@@ -490,13 +536,61 @@
             });
         }
 
+        // Initialize translations and PIX section
+        function initializeTranslations() {
+            // Apply translations to all elements
+            setText('main-title', t.title);
+            setText('subtitle', t.subtitle);
+            setText('donation-goal-title', t.donationGoal);
+            setText('raised-label', t.raised + ': $' + currentData.totalRaised.toFixed(2));
+            setText('goal-label', t.goal + ': $' + currentData.currentGoal.toFixed(2));
+            setText('donation-message', t.donationMessage);
+            setText('button-text', t.buttonText);
+            setText('click-message', t.clickMessage);
+            setText('pix-title', t.pixTitle);
+            setText('pix-instruction', t.pixInstruction);
+            setText('copy-pix-text', t.copyPixText);
+            setText('details-title', t.detailsTitle);
+            
+            // Show PIX section only for Brazilian users
+            if (lang === 'pt') {
+                document.getElementById('pix-section').style.display = 'block';
+            }
+        }
+
+        // Copy PIX code function
+        function copyPixCode() {
+            const pixCode = document.getElementById('pix-code').textContent;
+            navigator.clipboard.writeText(pixCode).then(() => {
+                // Show success feedback
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>' + t.pixCopied;
+                button.classList.add('bg-green-800');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-800');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy PIX code:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = pixCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            });
+        }
+
         // Event listeners
         btn.addEventListener('click', handleButtonClick);
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            // Set initial translations
-            buttonText.textContent = t.buttonText;
+            // Initialize translations and PIX section
+            initializeTranslations();
             
             fetchAndUpdateStatus();
             showSuccessToast();
