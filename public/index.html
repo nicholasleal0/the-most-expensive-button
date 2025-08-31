@@ -167,28 +167,28 @@
     
     <div class="container mx-auto px-4 py-12">
         <div class="max-w-3xl mx-auto text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
+            <h1 id="main-title" class="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
                 O Botão mais Caro do Mundo
             </h1>
             
-            <p class="text-lg md:text-xl mb-8 text-yellow-200 italic">
+            <p id="subtitle" class="text-lg md:text-xl mb-8 text-yellow-200 italic">
                 "Ele não faz absolutamente nada. Mas você pode dizer que fez parte disso. E ainda ajuda uma causa nobre."
             </p>
             
             <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 border border-white/20">
-                <h2 class="text-2xl font-semibold mb-4">Meta de Doação</h2>
+                <h2 id="donation-goal-title" class="text-2xl font-semibold mb-4">Meta de Doação</h2>
                 
                 <div class="mb-4">
                     <div class="flex justify-between mb-2">
-                        <span>Arrecadado: $<span id="total-raised">0.00</span></span>
-                        <span>Meta: $<span id="click-goal">100.00</span></span>
+                        <span id="raised-label">Arrecadado: $<span id="total-raised">0.00</span></span>
+                        <span id="goal-label">Meta: $<span id="click-goal">100.00</span></span>
                     </div>
                     <div class="progress-bar bg-gray-700">
                         <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
                 
-                <p class="text-sm text-yellow-100">
+                <p id="donation-message" class="text-sm text-yellow-100">
                     Quando a meta for atingida, metade do valor arrecadado será doado para <span id="charity-name" class="font-bold">Jocum</span>.
                 </p>
             </div>
@@ -222,15 +222,15 @@
             </div>
             
             <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                <h3 class="text-xl font-semibold mb-4">Detalhes da Arrecadação</h3>
+                <h3 id="details-title" class="text-xl font-semibold mb-4">Detalhes da Arrecadação</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                     <div>
-                        <p><span class="font-bold">Total de cliques:</span> <span id="total-clicks">0</span></p>
-                        <p><span class="font-bold">Valor por clique:</span> <span id="value-per-click">$1.00</span></p>
+                        <p><span class="font-bold" id="total-clicks-label">Total de cliques:</span> <span id="total-clicks">0</span></p>
+                        <p><span class="font-bold" id="value-per-click-label">Valor por clique:</span> <span id="value-per-click">$1.00</span></p>
                     </div>
                     <div>
-                        <p><span class="font-bold">Meta atual:</span> $<span id="current-goal">100.00</span></p>
-                        <p><span class="font-bold">Valor a ser doado:</span> $<span id="to-donate">0.00</span></p>
+                        <p><span class="font-bold" id="current-goal-label">Meta atual:</span> $<span id="current-goal">100.00</span></p>
+                        <p><span class="font-bold" id="value-to-donate-label">Valor a ser doado:</span> $<span id="to-donate">0.00</span></p>
                     </div>
                 </div>
             </div>
@@ -539,22 +539,58 @@
         // Initialize translations and PIX section
         function initializeTranslations() {
             // Apply translations to all elements
-            setText('main-title', t.title);
-            setText('subtitle', t.subtitle);
-            setText('donation-goal-title', t.donationGoal);
-            setText('raised-label', t.raised + ': $' + currentData.totalRaised.toFixed(2));
-            setText('goal-label', t.goal + ': $' + currentData.currentGoal.toFixed(2));
-            setText('donation-message', t.donationMessage);
-            setText('button-text', t.buttonText);
-            setText('click-message', t.clickMessage);
-            setText('pix-title', t.pixTitle);
-            setText('pix-instruction', t.pixInstruction);
-            setText('copy-pix-text', t.copyPixText);
-            setText('details-title', t.detailsTitle);
+            const elements = {
+                'main-title': t.title,
+                'subtitle': t.subtitle,
+                'donation-goal-title': t.donationGoal,
+                'donation-message': t.donationMessage,
+                'button-text': t.buttonText,
+                'pix-title': t.pixTitle,
+                'pix-instruction': t.pixInstruction,
+                'copy-pix-text': t.copyPixText,
+                'details-title': t.detailsTitle,
+                'total-clicks-label': t.totalClicks,
+                'value-per-click-label': t.valuePerClick,
+                'current-goal-label': t.currentGoal,
+                'value-to-donate-label': t.valueToDonate
+            };
+            
+            // Apply translations
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+            
+            // Update labels with dynamic content
+            updateLabelsWithData();
             
             // Show PIX section only for Brazilian users
             if (lang === 'pt') {
-                document.getElementById('pix-section').style.display = 'block';
+                const pixSection = document.getElementById('pix-section');
+                if (pixSection) {
+                    pixSection.style.display = 'block';
+                }
+            }
+        }
+        
+        // Update labels with current data
+        function updateLabelsWithData() {
+            const raisedLabel = document.getElementById('raised-label');
+            const goalLabel = document.getElementById('goal-label');
+            const clickMessage = document.getElementById('click-message');
+            
+            if (raisedLabel) {
+                raisedLabel.innerHTML = `${t.raised}: $<span id="total-raised">${currentData.totalRaised.toFixed(2)}</span>`;
+            }
+            if (goalLabel) {
+                goalLabel.innerHTML = `${t.goal}: $<span id="click-goal">${currentData.currentGoal.toFixed(2)}</span>`;
+            }
+            if (clickMessage) {
+                const currency = currentData.currency === 'BRL' ? 'R$' : '$';
+                const amount = (currentData.amount / 100).toFixed(2);
+                clickMessage.innerHTML = t.clickMessage.replace('$1.00', `${currency}${amount}`);
             }
         }
 
