@@ -162,6 +162,13 @@
         <span id="alertText">🎉 META QUASE ATINGIDA! 🎉</span>
     </div>
     
+    <!-- Admin Access Button (discrete) -->
+    <div class="fixed top-4 right-4 z-50">
+        <button onclick="showAdminLogin()" class="text-white/30 hover:text-white/60 text-xs transition-colors">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+    
     <!-- Error Box -->
     <div id="errorBox" class="hidden bg-red-600 text-white font-bold py-3 px-4 mb-6 rounded-lg mx-4"></div>
     
@@ -244,6 +251,118 @@
     
     <div id="money-rain" class="money-rain"></div>
     
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4 text-center">Admin Login</h3>
+            <div class="space-y-4">
+                <input type="text" id="adminUsername" placeholder="Usuário" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60">
+                <input type="password" id="adminPassword" placeholder="Senha" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60">
+                <div class="flex gap-2">
+                    <button onclick="adminLogin()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                        Entrar
+                    </button>
+                    <button onclick="hideAdminLogin()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden overflow-y-auto">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 max-w-4xl w-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Painel Administrativo</h2>
+                    <button onclick="hideAdminPanel()" class="text-white/60 hover:text-white text-xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Configurações Gerais -->
+                    <div class="bg-white/5 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Configurações Gerais</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Valor por Clique (centavos)</label>
+                                <input type="number" id="adminClickValue" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Meta Atual (centavos)</label>
+                                <input type="number" id="adminGoalValue" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Porcentagem para Doação (%)</label>
+                                <input type="number" id="adminDonationPercent" min="0" max="100" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações da Instituição -->
+                    <div class="bg-white/5 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Instituição Beneficiária</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Nome da Instituição</label>
+                                <input type="text" id="adminCharityName" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Telefone</label>
+                                <input type="text" id="adminCharityPhone" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Site</label>
+                                <input type="url" id="adminCharityWebsite" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Código PIX</label>
+                                <textarea id="adminCharityPix" rows="3" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white resize-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configurações de Login -->
+                    <div class="bg-white/5 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Alterar Credenciais</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Novo Usuário</label>
+                                <input type="text" id="adminNewUsername" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Nova Senha</label>
+                                <input type="password" id="adminNewPassword" class="w-full p-2 rounded bg-white/10 border border-white/20 text-white">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estatísticas -->
+                    <div class="bg-white/5 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Estatísticas</h3>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-medium">Total de Cliques:</span> <span id="adminStatsClicks">0</span></p>
+                            <p><span class="font-medium">Total Arrecadado:</span> <span id="adminStatsRaised">R$ 0,00</span></p>
+                            <p><span class="font-medium">Meta Atual:</span> <span id="adminStatsGoal">R$ 0,00</span></p>
+                            <p><span class="font-medium">Valor a Doar:</span> <span id="adminStatsToDonate">R$ 0,00</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 mt-6">
+                    <button onclick="saveAdminSettings()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors">
+                        Salvar Configurações
+                    </button>
+                    <button onclick="resetToDefaults()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors">
+                        Restaurar Padrões
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Configuration
         const API_BASE_URL = '';
@@ -318,7 +437,7 @@
                 errorPayment: 'Erro no pagamento. Tente novamente.',
                 redirecting: 'Redirecionando para pagamento...',
                 alertText: '🎉 META QUASE ATINGIDA! 🎉',
-                pixCopied: 'Código PIX copiado para a área de transferência!'
+                pixCopied: 'Código PIX copiado!'
             }
         };
 
@@ -536,8 +655,21 @@
             });
         }
 
+        // Detect language based on backend country detection
+        let lang = 'en'; // Default to English
+        let t = translations.en; // Default translations
+
         // Initialize translations and PIX section
-        function initializeTranslations() {
+        function initializeTranslations(countryCode = null) {
+            // Use country from backend if available, otherwise fallback to browser language
+            if (countryCode === 'BR' || (navigator.language || navigator.userLanguage).startsWith('pt')) {
+                lang = 'pt';
+                t = translations.pt;
+            } else {
+                lang = 'en';
+                t = translations.en;
+            }
+            
             // Apply translations to all elements
             const elements = {
                 'main-title': t.title,
@@ -567,7 +699,7 @@
             updateLabelsWithData();
             
             // Show PIX section only for Brazilian users
-            if (lang === 'pt') {
+            if (lang === 'pt' || countryCode === 'BR') {
                 const pixSection = document.getElementById('pix-section');
                 if (pixSection) {
                     pixSection.style.display = 'block';
@@ -618,6 +750,177 @@
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
             });
+        }
+
+        // Admin functions
+        function showAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+        }
+
+        function hideAdminLogin() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        async function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('adminToken', data.token);
+                    hideAdminLogin();
+                    showAdminPanel();
+                    loadAdminData();
+                } else {
+                    alert('Credenciais inválidas!');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Erro ao fazer login. Tente novamente.');
+            }
+        }
+
+        function showAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('hidden');
+        }
+
+        function hideAdminPanel() {
+            document.getElementById('adminPanel').classList.add('hidden');
+        }
+
+        async function loadAdminData() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/settings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Load current settings
+                    document.getElementById('adminClickValue').value = data.amount || 100;
+                    document.getElementById('adminGoalValue').value = data.currentGoal || 1000000;
+                    document.getElementById('adminDonationPercent').value = data.donationPercent || 50;
+                    document.getElementById('adminCharityName').value = data.charityName || 'Jocum';
+                    document.getElementById('adminCharityPhone').value = data.charityPhone || '';
+                    document.getElementById('adminCharityWebsite').value = data.charityWebsite || '';
+                    document.getElementById('adminCharityPix').value = data.charityPix || '';
+                    
+                    // Load stats
+                    document.getElementById('adminStatsClicks').textContent = data.totalClicks || 0;
+                    document.getElementById('adminStatsRaised').textContent = `R$ ${((data.totalRaised || 0) / 100).toFixed(2)}`;
+                    document.getElementById('adminStatsGoal').textContent = `R$ ${((data.currentGoal || 0) / 100).toFixed(2)}`;
+                    document.getElementById('adminStatsToDonate').textContent = `R$ ${(((data.totalRaised || 0) * (data.donationPercent || 50) / 100) / 100).toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+            }
+        }
+
+        async function saveAdminSettings() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('Sessão expirada. Faça login novamente.');
+                return;
+            }
+
+            const settings = {
+                amount: parseInt(document.getElementById('adminClickValue').value) || 100,
+                currentGoal: parseInt(document.getElementById('adminGoalValue').value) || 1000000,
+                donationPercent: parseInt(document.getElementById('adminDonationPercent').value) || 50,
+                charityName: document.getElementById('adminCharityName').value || 'Jocum',
+                charityPhone: document.getElementById('adminCharityPhone').value || '',
+                charityWebsite: document.getElementById('adminCharityWebsite').value || '',
+                charityPix: document.getElementById('adminCharityPix').value || ''
+            };
+
+            // Update credentials if provided
+            const newUsername = document.getElementById('adminNewUsername').value;
+            const newPassword = document.getElementById('adminNewPassword').value;
+            if (newUsername && newPassword) {
+                settings.newUsername = newUsername;
+                settings.newPassword = newPassword;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    alert('Configurações salvas com sucesso!');
+                    
+                    // Update PIX code in frontend if changed
+                    if (settings.charityPix) {
+                        document.getElementById('pix-code').textContent = settings.charityPix;
+                    }
+                    
+                    // Refresh main page data
+                    fetchAndUpdateStatus();
+                    
+                    // Clear credential fields
+                    document.getElementById('adminNewUsername').value = '';
+                    document.getElementById('adminNewPassword').value = '';
+                } else {
+                    alert('Erro ao salvar configurações!');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('Erro ao salvar configurações!');
+            }
+        }
+
+        async function resetToDefaults() {
+            if (!confirm('Tem certeza que deseja restaurar as configurações padrão?')) {
+                return;
+            }
+
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('Sessão expirada. Faça login novamente.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/reset`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Configurações restauradas para o padrão!');
+                    loadAdminData();
+                    fetchAndUpdateStatus();
+                } else {
+                    alert('Erro ao restaurar configurações!');
+                }
+            } catch (error) {
+                console.error('Error resetting settings:', error);
+                alert('Erro ao restaurar configurações!');
+            }
         }
 
         // Event listeners

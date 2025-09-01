@@ -17,6 +17,20 @@ let projectData = {
   charityName: "Jocum"
 };
 
+// Admin configuration
+let adminConfig = {
+  username: 'admin',
+  password: '1234',
+  amount: 100, // Value per click in cents
+  donationPercent: 50, // Percentage to donate
+  charityPhone: '',
+  charityWebsite: '',
+  charityPix: '00020101021126580014br.gov.bcb.pix01366e42077e-6c9b-4a55-ba08-88660925fc9452040000530398654041.005802BR5923NICHOLAS RODRIGUES LEAL6009SAO PAULO622905251K3T2FRSJ124PDBG9EV21BG186304442A'
+};
+
+// Simple JWT-like token storage (in production, use proper JWT)
+let adminTokens = new Set();
+
 // Price IDs for different currencies
 const PRICE_IDS = {
   'BRL': 'price_1RupyW7hbmQxAWthDISrdEUV',
@@ -90,13 +104,17 @@ function getCurrencyForCountry(country) {
 app.get('/api/status', (req, res) => {
   const country = getCountryFromIP(req.ip);
   const currency = getCurrencyForCountry(country);
-  const amount = CURRENCY_AMOUNTS[currency];
+  const amount = adminConfig.amount; // Use admin configured amount
   
   res.json({
     ...projectData,
     currency,
     amount,
-    country
+    country,
+    donationPercent: adminConfig.donationPercent,
+    charityPhone: adminConfig.charityPhone,
+    charityWebsite: adminConfig.charityWebsite,
+    charityPix: adminConfig.charityPix
   });
 });
 
@@ -176,6 +194,102 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
 // Serve the main page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Admin authentication middleware
+function authenticateAdmin(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const token = authHeader.substring(7);
+  if (!adminTokens.has(token)) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+  
+  next();
+}
+
+// Admin login
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  
+  if (username === adminConfig.username && password === adminConfig.password) {
+    const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    adminTokens.add(token);
+    
+    // Clean up old tokens (keep only last 5)
+    if (adminTokens.size > 5) {
+      const tokensArray = Array.from(adminTokens);
+      adminTokens.clear();
+      tokensArray.slice(-5).forEach(t => adminTokens.add(t));
+    }
+    
+    res.json({ token, message: 'Login successful' });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+});
+
+// Get admin settings
+app.get('/api/admin/settings', authenticateAdmin, (req, res) => {
+  res.json({
+    ...projectData,
+    ...adminConfig,
+    password: undefined // Don't send password
+  });
+});
+
+// Update admin settings
+app.post('/api/admin/settings', authenticateAdmin, (req, res) => {
+  const {
+    amount,
+    currentGoal,
+    donationPercent,
+    charityName,
+    charityPhone,
+    charityWebsite,
+    charityPix,
+    newUsername,
+    newPassword
+  } = req.body;
+  
+  // Update admin config
+  if (amount !== undefined) adminConfig.amount = parseInt(amount);
+  if (currentGoal !== undefined) projectData.currentGoal = parseInt(currentGoal);
+  if (donationPercent !== undefined) adminConfig.donationPercent = parseInt(donationPercent);
+  if (charityName !== undefined) projectData.charityName = charityName;
+  if (charityPhone !== undefined) adminConfig.charityPhone = charityPhone;
+  if (charityWebsite !== undefined) adminConfig.charityWebsite = charityWebsite;
+  if (charityPix !== undefined) adminConfig.charityPix = charityPix;
+  
+  // Update credentials if provided
+  if (newUsername && newPassword) {
+    adminConfig.username = newUsername;
+    adminConfig.password = newPassword;
+    
+    // Invalidate all existing tokens
+    adminTokens.clear();
+  }
+  
+  res.json({ message: 'Settings updated successfully' });
+});
+
+// Reset to defaults
+app.post('/api/admin/reset', authenticateAdmin, (req, res) => {
+  // Reset project data (keep clicks and raised amount)
+  projectData.currentGoal = 1000000;
+  projectData.charityName = "Jocum";
+  
+  // Reset admin config
+  adminConfig.amount = 100;
+  adminConfig.donationPercent = 50;
+  adminConfig.charityPhone = '';
+  adminConfig.charityWebsite = '';
+  adminConfig.charityPix = '00020101021126580014br.gov.bcb.pix01366e42077e-6c9b-4a55-ba08-88660925fc9452040000530398654041.005802BR5923NICHOLAS RODRIGUES LEAL6009SAO PAULO622905251K3T2FRSJ124PDBG9EV21BG186304442A';
+  
+  res.json({ message: 'Settings reset to defaults' });
 });
 
 // Health check
